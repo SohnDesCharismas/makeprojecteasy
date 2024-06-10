@@ -13,7 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
  * @returns {Promise<NextResponse>} - The response to be sent back.
  */
 
-export async function GET(request: Request) {
+/* export async function GET(request: Request) {
   const token = request.headers.get("Authorization");
 
   const res = await axios.post(
@@ -23,26 +23,42 @@ export async function GET(request: Request) {
   let result = res.data;
 
   return Response.json(result);
-}
+} */
 
 export async function POST(request: Request) {
   const token = request.headers.get("Authorization");
+  if (!token) {
+    return new Response("Unauthorized", { status: 401 });
+  }
   const data = await request.json();
 
-  const res = await axios.post(
-    `https://www.phonedistri.com/wp/wp-json/wpc/v1/create-address`,
-    {
-      address: data,
-      jwt: token,
-    }
-  );
+  console.log(data);
+  console.log(data?.userInput);
+  try {
+    const res = await axios.post(
+      `http://localhost:3000/groq`,
+      {
+        userInput: data?.userInput,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Eğer backend token doğrulaması gerektiriyorsa
+        },
+      }
+    );
 
-  let result = res.data;
-
-  return Response.json(result);
+    console.log(res);
+    let result = res.data;
+    console.log(result);
+    return Response.json(result);
+  } catch (error) {
+    console.log(error);
+    return new Response("Internal Server Error", { status: 500 });
+  }
 }
 
-export async function PUT(request: Request) {
+/* export async function PUT(request: Request) {
   const token = request.headers.get("Authorization");
   const data = await request.json();
 
@@ -75,3 +91,4 @@ export async function DELETE(request: Request) {
 
   return Response.json(result);
 }
+ */
